@@ -6,9 +6,15 @@ var background = null;
 var controller = null;
 var playBall = null;
 
+var canvasWidth = 800;
+var canvasHeight = 500;
+
 var frameRate = 120;
 
 var controllerSpeed = 8;
+
+var ballMaxSpeedX = 5;
+var ballMaxSpeedY = 5;
 
 var keysPressed = [];
 var keyLeftPlayer1 = 37;
@@ -36,8 +42,23 @@ function Drawable() {
     };
 
     this.setPos = function (pX, pY) {
-        this.posX = pX;
-        this.posY = pY;
+        if (pX != null) {
+            this.posX = pX;
+        }
+
+        if (pY != null) {
+            this.posY = pY;
+        }
+    };
+
+    this.setSpeed = function (pSpeedX, pSpeedY) {
+        if (pSpeedX != null) {
+            this.speedX = pSpeedX;
+        }
+
+        if (pSpeedY != null) {
+            this.speedY = pSpeedY;
+        }
     };
 
     this.calculateMovement = function() {
@@ -62,15 +83,56 @@ function PlayBall() {
     this.init = function () {
         this.initDrawable(imageRepo.playBall);
         this.setPos((canvasWidth / 2) - (this.width / 2), (canvasHeight / 2) - (this.height / 2));
+        this.setSpeed(Math.floor(Math.random()* ballMaxSpeedX), Math.floor(Math.random()* ballMaxSpeedY));
+    }
+
+    this.calculateMovement = function () {
+        var newPosX = this.posX + this.speedX;
+        var newPosY = this.posY + this.speedY;
+
+        this.checkControllerCollision(newPosX, newPosY, controller);
+        this.checkBorderCollision(newPosX, newPosY);
+    }
+
+    this.checkControllerCollision = function(pX, pY, pController) {
+        if (pX >= pController.posX && pX <= pController.posX + pController.width
+                && pY + this.height >= pController.posY) {
+
+            this.setSpeed(null, this.speedY * -1);
+            this.setPos(null, pController.posY - this.height);
+        }
+    }
+
+    this.checkBorderCollision = function (pX, pY) {
+        if (pX <= 0) {
+            this.setPos(this.width, null);
+            this.setSpeed(this.speedX * -1, null);
+        } if (pX >= canvasWidth - this.width) {
+            this.setPos(canvasWidth - this.width, null);
+            this.setSpeed(this.speedX * -1,null);
+        } else {
+            this.setPos(pX, null);
+        }
+
+        if (pY <= 0) {
+            this.setPos(null, this.height);
+            this.setSpeed(null, this.speedY * -1);
+        } else if (pY >= canvasHeight - this.height) {
+            this.setPos(null, canvasHeight - this.height);
+            this.setSpeed(null ,this.speedY * -1);
+        } else {
+            this.setPos(null, pY);
+        }
     }
 }
 PlayBall.prototype = new Drawable();
 
 function Controller() {
+    var controllerGamestageSpace = 5;
 
     this.init = function () {
         this.initDrawable(imageRepo.controller);
-        this.setPos((canvasWidth / 2) - (this.width / 2), canvasHeight - (this.height + 5));
+        this.setPos((canvasWidth / 2) - (this.width / 2), canvasHeight - (this.height + controllerGamestageSpace));
     };
 
     this.calculateMovement = function () {
@@ -124,10 +186,12 @@ function keyUpListener(event) {
 init();
 function init() {
     var canvasElement = document.getElementById('gameStage');
-    context = canvasElement.getContext('2d');
+    canvasElement.width = canvasWidth;
+    canvasElement.height = canvasHeight;
+    canvasElement.style.width =  canvasWidth + 'px';
+    canvasElement.style.height = canvasHeight + 'px';
 
-    canvasHeight = parseInt(canvasElement.height);
-    canvasWidth = parseInt(canvasElement.width);
+    context = canvasElement.getContext('2d');
 
     background = new Background();
     background.init();
@@ -145,7 +209,7 @@ function init() {
 }
 
 function loop() {
-    context.clearRect(0,0, canvasHeight, canvasWidth);
+    context.clearRect(0,0, canvasWidth, canvasHeight);
 
     background.draw();
     playBall.draw();
