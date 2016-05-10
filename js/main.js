@@ -6,6 +6,8 @@ var background = null;
 var controller = null;
 var playBall = null;
 
+var isGameRunning = false;
+
 var canvasWidth = 800;
 var canvasHeight = 500;
 
@@ -14,12 +16,15 @@ var frameRate = 120;
 var controllerSpeed = 8;
 var controllerGamestageSpace = 10;
 
+var ballMinSpeedX = 0;
 var ballMaxSpeedX = 5;
+var ballMinSpeedY = 2;
 var ballMaxSpeedY = 5;
 
 var keysPressed = [];
 var keyLeftPlayer1 = 37;
 var keyRightPlayer1 = 39;
+var keySpace = 32;
 
 var imageRepo = new function() {
     this.background = new Image();
@@ -84,7 +89,11 @@ function PlayBall() {
     this.init = function () {
         this.initDrawable(imageRepo.playBall);
         this.setPos((canvasWidth / 2) - (this.width / 2), (canvasHeight / 2) - (this.height / 2));
-        this.setSpeed(Math.floor(Math.random()* ballMaxSpeedX), Math.floor(Math.random()* ballMaxSpeedY));
+    }
+
+    this.initSpeed = function () {
+        this.setSpeed(getRandomNumber(ballMinSpeedX, ballMaxSpeedX), getRandomNumber(ballMinSpeedY, ballMaxSpeedY));
+        console.log(this.speedX + ' - ' + this.speedY);
     }
 
     this.calculateMovement = function () {
@@ -97,7 +106,7 @@ function PlayBall() {
 
     this.checkControllerCollision = function(pX, pY, pController) {
         if (pX >= pController.posX && pX <= pController.posX + pController.width
-                && pY + this.height >= pController.posY) {
+                && pY + this.height >= pController.posY && pY <= pController.posY) {
 
             this.setSpeed(null, this.speedY * -1);
             this.setPos(null, pController.posY - this.height);
@@ -118,9 +127,8 @@ function PlayBall() {
         if (pY <= 0) {
             this.setPos(null, this.height);
             this.setSpeed(null, this.speedY * -1);
-        } else if (pY >= canvasHeight - this.height) {
-            this.setPos(null, canvasHeight - this.height);
-            this.setSpeed(null ,this.speedY * -1);
+        } else if (pY > canvasHeight - this.height) {
+            gameOver();
         } else {
             this.setPos(null, pY);
         }
@@ -176,10 +184,36 @@ function keyDownListener(event) {
 
 function keyUpListener(event) {
     for (var eachIndex in keysPressed) {
-        if (keysPressed[eachIndex] === event.keyCode) {
+        if (event.keyCode === keysPressed[eachIndex]) {
             keysPressed.splice(eachIndex, 1);
         }
     }
+
+    if (event.keyCode === keySpace && !isGameRunning) {
+        runGame();
+    }
+}
+
+function getRandomNumber(pMin, pMax) {
+    var random;
+
+    random = Math.floor(Math.random() * (pMax - pMin)) + pMin;
+
+    if (Math.round(Math.random()) === 1) {
+        random = random * -1;
+    }
+
+    return random;
+}
+
+function runGame() {
+    playBall.initSpeed();
+    isGameRunning = true;
+}
+
+function gameOver() {
+    isGameRunning = false;
+    playBall.init();
 }
 
 init();
@@ -211,8 +245,8 @@ function loop() {
     context.clearRect(0,0, canvasWidth, canvasHeight);
 
     background.draw();
-    playBall.draw();
     controller.draw();
+    playBall.draw();
 
     window.setTimeout(loop, 1000 / frameRate);
 }
