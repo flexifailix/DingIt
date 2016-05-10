@@ -1,6 +1,4 @@
 var context = null;
-var canvasHeight = null;
-var canvasWidth = null;
 
 var background = null;
 var controller = null;
@@ -98,18 +96,31 @@ function PlayBall() {
 
     this.calculateMovement = function () {
         var newPosX = this.posX + this.speedX;
-        var newPosY = this.posY + this.speedY;
+        var newPosY = this.posY + this.speedY
+
+        this.setPos(newPosX, newPosY);
 
         this.checkControllerCollision(newPosX, newPosY, controller);
         this.checkBorderCollision(newPosX, newPosY);
     }
 
     this.checkControllerCollision = function(pX, pY, pController) {
-        if (pX >= pController.posX && pX <= pController.posX + pController.width
+        var ballMiddle = pX + (this.width / 2);
+        if (ballMiddle >= pController.posX && ballMiddle <= pController.posX + pController.width
                 && pY + this.height > pController.posY && pY < pController.posY) {
-
             this.setSpeed(null, this.speedY * -1);
             this.setPos(null, pController.posY - this.height);
+
+            var controllerMiddle = (pController.posX + (pController.width / 2));
+            var multiplier = 1;
+            if (ballMiddle < controllerMiddle) {
+                multiplier = -1;
+            }
+            var maxDifference = controllerMiddle - pController.posX;
+            var difference = (ballMiddle - (pController.posX + (pController.width / 2))) * multiplier;
+            var acceleration = (difference / maxDifference + 1);
+            var additionalSpeed = acceleration *  multiplier;
+            this.setSpeed(this.speedX + additionalSpeed, null);
         }
     }
 
@@ -120,8 +131,6 @@ function PlayBall() {
         } if (pX >= canvasWidth - this.width) {
             this.setPos(canvasWidth - this.width, null);
             this.setSpeed(this.speedX * -1,null);
-        } else {
-            this.setPos(pX, null);
         }
 
         if (pY <= 0) {
@@ -129,8 +138,6 @@ function PlayBall() {
             this.setSpeed(null, this.speedY * -1);
         } else if (pY > canvasHeight - this.height) {
             gameOver();
-        } else {
-            this.setPos(null, pY);
         }
     }
 }
