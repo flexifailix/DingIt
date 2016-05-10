@@ -106,7 +106,7 @@ function PlayBall() {
 
     this.checkControllerCollision = function(pX, pY, pController) {
         if (pX >= pController.posX && pX <= pController.posX + pController.width
-                && pY + this.height >= pController.posY && pY <= pController.posY) {
+                && pY + this.height > pController.posY && pY < pController.posY) {
 
             this.setSpeed(null, this.speedY * -1);
             this.setPos(null, pController.posY - this.height);
@@ -221,8 +221,6 @@ function init() {
     var canvasElement = document.getElementById('gameStage');
     canvasElement.width = canvasWidth;
     canvasElement.height = canvasHeight;
-    canvasElement.style.width =  canvasWidth + 'px';
-    canvasElement.style.height = canvasHeight + 'px';
 
     context = canvasElement.getContext('2d');
 
