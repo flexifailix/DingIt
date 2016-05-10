@@ -12,6 +12,7 @@ var canvasHeight = 500;
 var frameRate = 120;
 
 var controllerSpeed = 8;
+var controllerGamestageSpace = 10;
 
 var ballMaxSpeedX = 5;
 var ballMaxSpeedY = 5;
@@ -128,8 +129,6 @@ function PlayBall() {
 PlayBall.prototype = new Drawable();
 
 function Controller() {
-    var controllerGamestageSpace = 5;
-
     this.init = function () {
         this.initDrawable(imageRepo.controller);
         this.setPos((canvasWidth / 2) - (this.width / 2), canvasHeight - (this.height + controllerGamestageSpace));
