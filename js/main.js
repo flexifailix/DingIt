@@ -60,16 +60,37 @@ var keySpace = 32;
 
 // -------------------------------------------------------------------------------
 
+
 var imageRepo = new function() {
     this.background = new Image();
-    this.background.src = "img/background.png";
-
     this.playBall = new Image();
-    this.playBall.src = "img/playBall.png";
-
     this.controller = new Image();
+
+    var imagesLoaded = 0;
+    var imagesCount = 3;
+
+    function imageLoad() {
+        imagesLoaded++;
+        if (imagesLoaded === imagesCount) {
+            init();
+        }
+    }
+
+    this.background.onload = function () {
+        imageLoad();
+    };
+
+    this.playBall.onload = function () {
+        imageLoad();
+    };
+    this.controller.onload = function () {
+        imageLoad();
+    };
+
+    this.background.src = "img/background.png";
+    this.playBall.src = "img/playBall.png";
     this.controller.src = "img/controller.png";
-};
+}
 
 function Drawable() {
     this.initDrawable = function (pImage) {
@@ -276,7 +297,7 @@ function gameOver() {
     playBall.init();
 }
 
-init();
+
 function init() {
     canvasElement = document.getElementById('gameStage');
     canvasElement.width = canvasWidth;
