@@ -13,14 +13,14 @@ var cssWidth = '480px';
 var cssHeight = '320px';
 
 var frameRate = 60;
-var frameTime = frameRate/1000; 
+var frameTime = frameRate/1000;
 
 var controllerSpeed = 8;
 var controllerGamestageSpace = 10;
 
 var ballMinSpeedX = 0;
-var ballMaxSpeedX = 5;
-var ballMinSpeedY = 2;
+var ballMaxSpeedX = 12;
+var ballMinSpeedY = 4;
 var ballMaxSpeedY = 5;
 
 var keysPressed = [];
@@ -29,20 +29,20 @@ var keyRightPlayer1 = 39;
 var keySpace = 32;
 
 // -------------------------------------------------------------------------------
-// use requestAnimationFrame for main update loop 
+// use requestAnimationFrame for main update loop
 
 ( function () {
-	
+
     var lastTime = 0;
- 
-	// get browser specific 'requestAnimationFrame' implementation
-	var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+
+    // get browser specific 'requestAnimationFrame' implementation
+    var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
     for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
         window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
         window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
     }
 
-	// fallback to setTimeout (used later on server!)
+    // fallback to setTimeout (used later on server!)
     if ( !window.requestAnimationFrame ) {
         window.requestAnimationFrame = function ( callback, element ) {
             var currTime = Date.now(), timeToCall = Math.max( 0, frameTime - ( currTime - lastTime ) );
@@ -130,6 +130,22 @@ function PlayBall() {
         console.log(this.speedX + ' - ' + this.speedY);
     }
 
+    this.setSpeed = function (pSpeedX, pSpeedY) {
+        if (pSpeedX != null) {
+            if (pSpeedX > ballMaxSpeedX) {
+                this.speedX = ballMaxSpeedX;
+            } else if (pSpeedX < ballMaxSpeedX * -1) {
+                this.speedX = ballMaxSpeedX * -1;
+            } else {
+                this.speedX = pSpeedX;
+            }
+        }
+
+        if (pSpeedY != null) {
+            this.speedY = pSpeedY;
+        }
+    };
+
     this.calculateMovement = function () {
         var newPosX = this.posX + this.speedX;
         var newPosY = this.posY + this.speedY
@@ -155,8 +171,9 @@ function PlayBall() {
             var maxDifference = controllerMiddle - pController.posX;
             var difference = (ballMiddle - (pController.posX + (pController.width / 2))) * multiplier;
             var acceleration = (difference / maxDifference + 1);
-            var additionalSpeed = acceleration *  multiplier;
-            this.setSpeed(this.speedX + additionalSpeed, null);
+
+
+            this.setSpeed(this.speedX + (pController.speedX / 2 * acceleration), null);
         }
     }
 
