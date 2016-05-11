@@ -75,17 +75,9 @@ var imageRepo = new function() {
             init();
         }
     }
-
-    this.background.onload = function () {
-        imageLoad();
-    };
-
-    this.playBall.onload = function () {
-        imageLoad();
-    };
-    this.controller.onload = function () {
-        imageLoad();
-    };
+    this.background.onload = imageLoad;
+    this.playBall.onload = imageLoad;
+    this.controller.onload = imageLoad();
 
     this.background.src = "img/background.png";
     this.playBall.src = "img/playBall.png";
