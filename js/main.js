@@ -1,4 +1,5 @@
 var context = null;
+var canvasElement = null;
 
 var background = null;
 var controller = null;
@@ -11,7 +12,8 @@ var canvasHeight = 640;
 var cssWidth = '480px';
 var cssHeight = '320px';
 
-var frameRate = 120;
+var frameRate = 60;
+var frameTime = frameRate/1000; 
 
 var controllerSpeed = 8;
 var controllerGamestageSpace = 10;
@@ -25,6 +27,38 @@ var keysPressed = [];
 var keyLeftPlayer1 = 37;
 var keyRightPlayer1 = 39;
 var keySpace = 32;
+
+// -------------------------------------------------------------------------------
+// use requestAnimationFrame for main update loop 
+
+( function () {
+	
+    var lastTime = 0;
+ 
+	// get browser specific 'requestAnimationFrame' implementation
+	var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+    for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
+        window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+        window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
+    }
+
+	// fallback to setTimeout (used later on server!)
+    if ( !window.requestAnimationFrame ) {
+        window.requestAnimationFrame = function ( callback, element ) {
+            var currTime = Date.now(), timeToCall = Math.max( 0, frameTime - ( currTime - lastTime ) );
+            var id = window.setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall );
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+    }
+
+    if ( !window.cancelAnimationFrame ) {
+        window.cancelAnimationFrame = function ( id ) { clearTimeout( id ); };
+    }
+
+}() );
+
+// -------------------------------------------------------------------------------
 
 var imageRepo = new function() {
     this.background = new Image();
@@ -227,7 +261,7 @@ function gameOver() {
 
 init();
 function init() {
-    var canvasElement = document.getElementById('gameStage');
+    canvasElement = document.getElementById('gameStage');
     canvasElement.width = canvasWidth;
     canvasElement.height = canvasHeight;
     canvasElement.style.width = cssWidth;
@@ -251,11 +285,12 @@ function init() {
 }
 
 function loop() {
-    context.clearRect(0,0, canvasWidth, canvasHeight);
+	context.clearRect(0,0, canvasWidth, canvasHeight);
 
     background.draw();
     controller.draw();
     playBall.draw();
-
-    window.setTimeout(loop, 1000 / frameRate);
+	
+	// use browser API for animations rather that setTimeout()
+	window.requestAnimationFrame( loop, this.canvasElement );
 }
