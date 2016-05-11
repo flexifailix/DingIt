@@ -6,8 +6,10 @@ var playBall = null;
 
 var isGameRunning = false;
 
-var canvasWidth = 800;
-var canvasHeight = 500;
+var canvasWidth = 960;
+var canvasHeight = 640;
+var cssWidth = '480px';
+var cssHeight = '320px';
 
 var frameRate = 120;
 
@@ -228,6 +230,8 @@ function init() {
     var canvasElement = document.getElementById('gameStage');
     canvasElement.width = canvasWidth;
     canvasElement.height = canvasHeight;
+    canvasElement.style.width = cssWidth;
+    canvasElement.style.height = cssHeight;
 
     context = canvasElement.getContext('2d');
 
