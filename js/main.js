@@ -6,7 +6,9 @@ var controller1 = null;
 var controller2 = null;
 var playBall = null;
 
+var pointsToWin = 6;
 var isGameRunning = false;
+var isGameOver = false;
 
 var canvasWidth = 960;
 var canvasHeight = 640;
@@ -219,26 +221,36 @@ function PlayBall() {
             this.setSpeed(this.speedX * -1, null);
         }
 
-        if (pY <= 0 || pY > canvasHeight - this.height) {
-            gameOver();
+        if (pY <= 0){
+            controller1.points++;
+            roundOver();
+        }
+
+        if (pY > canvasHeight - this.height) {
+            controller2.points++;
+            roundOver();
+        }
+
+        if (controller1.points === pointsToWin || controller2.points === pointsToWin) {
+            isGameOver = true;
         }
     }
 }
 PlayBall.prototype = new Drawable();
 
 function Controller() {
+    this.points = 0;
+
     var reactedTime = 0;
     var reactionTimeMin = 1;
     var reactionTimeMax = 10;
     var reactionTime = getRandomNumber(reactionTimeMin, reactionTimeMax);
 
-    this.init = function () {
-        this.init(false);
-    }
 
-    this.init = function (pIsPlayer) {
+    this.init = function (pIsPlayer, pName) {
         this.initDrawable(imageRepo.controller);
         this.isPlayer = pIsPlayer;
+        this.name = pName;
     };
 
     this.setStartPos = function (pPosY) {
@@ -321,7 +333,7 @@ function keyUpListener(event) {
     }
 
     if (event.keyCode === keySpace && !isGameRunning) {
-        runGame();
+        startRound();
     }
 }
 
@@ -337,16 +349,38 @@ function getRandomNumber(pMin, pMax) {
     return random;
 }
 
-function runGame() {
+function startRound() {
     playBall.initSpeed();
     isGameRunning = true;
+
+    if (isGameOver) {
+        isGameOver = false;
+        controller1.points = 0;
+        controller2.points = 0;
+    }
 }
 
-function gameOver() {
+function roundOver() {
     isGameRunning = false;
     playBall.init();
 }
 
+function gameOver() {
+    var winningPlayer;
+    if (controller1.points === pointsToWin) {
+        winningPlayer = controller1.name;
+    }
+
+    if (controller2.points === pointsToWin) {
+        winningPlayer = controller2.name;
+    }
+
+    context.fillStyle = "black";
+    context.font = "bold 30px Arial";
+    context.textAlign = "center";
+    var winningText = winningPlayer + " won the Game!";
+    context.fillText(winningText, canvasWidth / 2, canvasHeight / 2 - 20);
+}
 
 function init() {
     canvasElement = document.getElementById('gameStage');
@@ -364,11 +398,11 @@ function init() {
     playBall.init();
 
     controller1 = new Controller();
-    controller1.init(true);
+    controller1.init(true, "Jens");
     controller1.setStartPos(canvasHeight - (controller1.height + controllerGamestageSpace));
 
     controller2 = new Controller();
-    controller2.init();
+    controller2.init(false, "AI");
     controller2.setStartPos(controllerGamestageSpace);
 
     document.addEventListener("keydown", keyDownListener, false);
@@ -381,10 +415,24 @@ function loop() {
     context.clearRect(0, 0, canvasWidth, canvasHeight);
 
     background.draw();
+
+    context.textAlign = "left";
+    context.fillStyle = "black";
+    context.font = "bold 18px Arial";
+
+    context.fillText(controller2.name + ": " + controller2.points, 10, canvasHeight / 2 - 10);
+    context.fillStyle = "black";
+    context.font = "bold 18px Arial";
+
+    context.fillText(controller1.name + ": " + controller1.points, 10, canvasHeight / 2 + 10);
     controller1.draw();
     controller2.draw();
 
     playBall.draw();
+
+    if (isGameOver) {
+        gameOver();
+    }
 
     // use browser API for animations rather that setTimeout()
     window.requestAnimationFrame(loop, this.canvasElement);
