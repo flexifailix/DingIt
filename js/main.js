@@ -246,7 +246,6 @@ function Controller() {
     var reactionTimeMax = 10;
     var reactionTime = getRandomNumber(reactionTimeMin, reactionTimeMax);
 
-
     this.init = function (pIsPlayer, pName) {
         this.initDrawable(imageRepo.controller);
         this.isPlayer = pIsPlayer;
@@ -277,23 +276,36 @@ function Controller() {
     this.calculateAIMovement = function () {
         var changeSpeed;
 
-        changeSpeed = getDifference(playBall.middleX, this.middleX);
-        if (changeSpeed > controllerSpeed) {
-            changeSpeed = controllerSpeed;
-        }
+        if (playBall.speedY < 0) {
+            changeSpeed = getDifference(playBall.middleX, this.middleX);
+            if (changeSpeed > controllerSpeed) {
+                changeSpeed = controllerSpeed;
+            }
 
-        if (playBall.middleX < this.middleX ) {
-            changeSpeed = -1 * changeSpeed;
-        }
+            if (playBall.middleX < this.middleX ) {
+                changeSpeed = -1 * changeSpeed;
+            }
 
-        if ((this.speedX > 0 && changeSpeed < 0) || (this.speedX < 0 && changeSpeed > 0)) {
-            reactedTime++;
-            if (reactedTime > reactionTime) {
+            if ((this.speedX > 0 && changeSpeed < 0) || (this.speedX < 0 && changeSpeed > 0)) {
+                reactedTime++;
+                if (reactedTime > reactionTime) {
+                    this.speedX = changeSpeed;
+                    reactionTime = getRandomNumber(reactionTimeMin, reactionTimeMax);
+                    reactedTime = 0;
+                }
+            } else {
                 this.speedX = changeSpeed;
-                reactionTime = getRandomNumber(reactionTimeMin, reactionTimeMax);
-                reactedTime = 0;
             }
         } else {
+            changeSpeed = getDifference(canvasWidth / 2 , this.middleX);
+            if (changeSpeed > controllerSpeed) {
+                changeSpeed = controllerSpeed;
+            }
+
+            if (canvasWidth / 2 < this.middleX) {
+                changeSpeed = - 1 * changeSpeed;
+            }
+
             this.speedX = changeSpeed;
         }
     }
