@@ -227,7 +227,10 @@ function PlayBall() {
 PlayBall.prototype = new Drawable();
 
 function Controller() {
-    this.time = 1;
+    var reactedTime = 0;
+    var reactionTimeMin = 1;
+    var reactionTimeMax = 10;
+    var reactionTime = getRandomNumber(reactionTimeMin, reactionTimeMax);
 
     this.init = function () {
         this.init(false);
@@ -260,11 +263,26 @@ function Controller() {
     };
 
     this.calculateAIMovement = function () {
-        this.speedX = 0;
-        if (playBall.middleX < this.minX) {
-            this.speedX = -1 * controllerSpeed;
-        } else if (playBall.middleX > this.maxX) {
-            this.speedX = controllerSpeed;
+        var changeSpeed;
+
+        changeSpeed = getDifference(playBall.middleX, this.middleX);
+        if (changeSpeed > controllerSpeed) {
+            changeSpeed = controllerSpeed;
+        }
+
+        if (playBall.middleX < this.middleX ) {
+            changeSpeed = -1 * changeSpeed;
+        }
+
+        if ((this.speedX > 0 && changeSpeed < 0) || (this.speedX < 0 && changeSpeed > 0)) {
+            reactedTime++;
+            if (reactedTime > reactionTime) {
+                this.speedX = changeSpeed;
+                reactionTime = getRandomNumber(reactionTimeMin, reactionTimeMax);
+                reactedTime = 0;
+            }
+        } else {
+            this.speedX = changeSpeed;
         }
     }
 
@@ -370,4 +388,14 @@ function loop() {
 
     // use browser API for animations rather that setTimeout()
     window.requestAnimationFrame(loop, this.canvasElement);
+}
+
+function getDifference(pA, pB) {
+    var result;
+    if (pA > pB) {
+        result = pA - pB;
+    } else {
+        result = pB - pA;
+    }
+    return result;
 }
